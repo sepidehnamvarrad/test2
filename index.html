@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>My experiment</title>
+  <script src="jspsych.js"></script>
+  <script src="plugins/jspsych-html-keyboard-response.js"></script>
+  <script src="plugins/jspsych-survey-html-form.js"></script>
+  <script src="plugins/jspsych-image-slider-response.js"></script>
+  <script src="plugins/jspsych-image-keyboard-response.js"></script>
+  <script src="plugins/jspsych-html-slider-response.js"></script>
+  <link rel="stylesheet" href="css/jspsych.css">
+  </link>
+</head>
+
+<body>
+</body>
+<script>
+
+  var TODAY = new Date();
+  var DD = String(TODAY.getDate()).padStart(2, '0');
+  var MM = String(TODAY.getMonth() + 1).padStart(2, '0');
+  var YYYY = TODAY.getFullYear();
+  const DATE = YYYY + MM + DD;
+
+
+
+  var timeline = [];
+
+
+  var welcome = {
+    type: "survey-html-form",
+    preamble: "Welcome to the experiment. Please complete the form.",
+    html: "<p>Participant ID: <input name= 'Part_ID' type= 'text' /></p> ",
+    on_finish: function (data) {
+      data.responses = JSON.parse(data.responses);
+      jsPsych.data.addProperties({
+        Part_ID: data.responses.Part_ID,
+      })
+    }
+
+  };
+  timeline.push(welcome);
+
+  /*var test_stimuli = [
+{ pics: 'img/practice/Depressed pose 1.jpg', data: {test_part: 'practice_2', correct_response: '70'}},
+{ pics: 'img/practice/Beach 1.jpg', data: {test_part: 'practice_2', correct_response: '70'}},
+{ pics: 'img/practice/Dessert 6.jpg', data: {test_part: 'practice_2', correct_response: '74'}},
+{ pics: 'img/practice/Frustrated pose 8.jpg', data: {test_part: 'practice_2', correct_response: '74'}},
+
+]; */
+
+
+  var instructions = {
+    type: "html-keyboard-response",
+    stimulus: "<p>In this experiment, multiple images will appear on the screen.Your task is to rate the images based on your feeling about the Pleasantness/Unpleasantness of them. There is a slider under each picture which have integers from -10 to +10. If you feel the picture you see is pleasant to you, drag the slider to the right (the + end). If you feel th image is unpleasant to you, drag the slider to the left (the - end), as fast as you can. After each trial there is a recognition test.First you will have a practice trial and then the test begins. Press any key to begin.</p>",
+    post_trial_gap: 1000
+  };
+  timeline.push(instructions);
+
+  var practice_1 = {
+    timeline: [
+      {
+        type: "image-slider-response",
+        labels: ['-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', 'Neutral ', '+1', '+2', '+3', '+4', '+5', '+6', '+7', '+8', '+9', '+10'],
+        prompt: "<p>How Unpleasant/Pleasant is this picture?</p>",
+        slider_width: 900,
+        min: 0,
+        max: 100,
+        start: 50,
+        stimulus: jsPsych.timelineVariable('pics'),
+        stimulus_height: 300,
+        response_ends_trial: true,
+        post_trial_gap: 1000,
+        /*data: jsPsych.timelineVariable('data'),
+        on_finish: function(data) {
+        if (data.response == 50) {
+          data.accuracy = 'NA'
+        } else {
+          data.accuracy = 'NA'
+        }
+      } */
+      }
+    ],
+    timeline_variables: [
+      { pics: 'img/practice/Beach 1.jpg' },
+      { pics: 'img/practice/Depressed pose 1.jpg' }
+    ],
+    randomize_order: false
+
+  }
+  var practice_2 = {
+    timeline: [
+      {
+        type: "image-keyboard-response",
+        prompt: '<p>Have you seen this picture?</p><p>If Yes press F, if No press J.</p>',
+        choices: [70, 74],
+        response_ends_trial: true,
+        randomize_order: true,
+        post_trial_gap: 1000,
+        require_movement: false,
+        data: jsPsych.timelineVariable('data'),
+        stimulus: jsPsych.timelineVariable('pics'),
+        on_finish: function (data) {
+          if (data.response == data.correct_response) {
+            data.accuracy = 1
+          } else {
+            data.accuracy = 0
+          }
+        }
+      },
+    ],
+    timeline_variables: [
+      { pics: 'img/practice/Depressed pose 1.jpg', data: { test_part: 'practice_2', image: 'h1', correct_response: '70', valence: '2.1' } },
+      { pics: 'img/practice/Beach 1.jpg', data: { test_part: 'practice_2', image: 'h2', correct_response: '70', valence: '3' } },
+      { pics: 'img/practice/Dessert 6.jpg', data: { test_part: 'practice_2', image: 'h3', correct_response: '74', valence: '4' } },
+      { pics: 'img/practice/Frustrated pose 8.jpg', data: { test_part: 'practice_2', image: 'h4', correct_response: '74', valence: '3.5' } },
+
+      /*{ pics: 'img/practice/Dessert 6.jpg'},
+      { pics: 'img/practice/Frustrated pose 8.jpg'},
+      { pics: 'img/practice/Beach 1.jpg'},
+      { pics: 'img/practice/Depressed pose 1.jpg'}*/
+
+    ],
+    randomize_order: true
+
+  }
+
+  var practice = {
+    timeline: [practice_1, practice_2],
+
+  }
+  timeline.push(practice);
+
+  var trial_instruction = {
+    type: "html-keyboard-response",
+    stimulus: '<p>Now you will see multiple images. You can use the slider to rate the Unpleasantnees/Pleasantness of the images.</p><p>If you are ready to begin, press any key to start.</p>'
+  }
+
+  var album_1 = {
+    timeline: [
+      {
+        type: "image-slider-response",
+        labels: ['-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', 'Neutral', '+1', '+2', '+3', '+4', '+5', '+6', '+7', '+8', '+9', '+10'],
+        prompt: "<p>How Unpleasant/Pleasant is this picture?</p>",
+        slider_width: 900,
+        min: 0,
+        max: 100,
+        start: 50,
+        stimulus: jsPsych.timelineVariable('pics'),
+        stimulus_height: 300,
+        response_ends_trial: true,
+        post_trial_gap: 1000,
+        data: jsPsych.timelineVariable('data'),
+        on_finish: function (data) {
+          data.accuracy = 'NA'
+          // if (data.response == data.correct_response) {
+          //   data.accuracy = 'NA'
+          // } else {
+          //   data.accuracy = 'NA'
+          // }
+        }
+      }
+    ],
+    timeline_variables: [
+      { pics: 'img/album1/a1.jpg', data: { test_part: 'album_1', image: 'a1', valence: 4.333, arousal: 2.109, correct_response: '70' } },
+      { pics: 'img/album1/a2.jpg', data: { test_part: 'album_1', image: 'a2', valence: 4.02, arousal: 2.02, correct_response: '70' } },
+      { pics: 'img/album1/a3.jpg', data: { test_part: 'album_1', image: 'a3', valence: 4.089, arousal: 1.932, correct_response: '70' } },
+      { pics: 'img/album1/a4.jpg', data: { test_part: 'album_1', image: 'a4', valence: 4.314, arousal: 2.198, correct_response: '70' } },
+      { pics: 'img/album1/a5.jpg', data: { test_part: 'album_1', image: 'a5', valence: 4.333, arousal: 2.287, correct_response: '70' } },
+      { pics: 'img/album1/a6.jpg', data: { test_part: 'album_1', image: 'a6', valence: 3.999, arousal: 2, correct_response: '70' } },
+      { pics: 'img/album1/a7.jpg', data: { test_part: 'album_1', image: 'a7', valence: 4.204, arousal: 1.981, correct_response: '70' } },
+      { pics: 'img/album1/a8.jpg', data: { test_part: 'album_1', image: 'a8', valence: 3.804, arousal: 2.356, correct_response: '70' } },
+      { pics: 'img/album1/a9.jpg', data: { test_part: 'album_1', image: 'a9', valence: 4.245, arousal: 2.347, correct_response: '70' } },
+      { pics: 'img/album1/a10.jpg', data: { test_part: 'album_1', image: 'a10', valence: 4.218, arousal: 2.301, correct_response: '70' } },
+      { pics: 'img/album1/a14.jpg', data: { test_part: 'album_1', image: 'a14', valence: 4.549, arousal: 2.257, correct_response: '70' } },
+      { pics: 'img/album1/a15.jpg', data: { test_part: 'album_1', image: 'a15', valence: 4.941, arousal: 2.426, correct_response: '70' } },
+      { pics: 'img/album1/a11.jpg', data: { test_part: 'album_1', image: 'a11', valence: 2.147, arousal: 4.099, correct_response: '70' } },
+      { pics: 'img/album1/a12.jpg', data: { test_part: 'album_1', image: 'a12', valence: 2.137, arousal: 3.069, correct_response: '70' } },
+      { pics: 'img/album1/a13.jpg', data: { test_part: 'album_1', image: 'a13', valence: 2.049, arousal: 4.106, correct_response: '70' } },
+
+
+    ],
+    randomize_order: false
+  }
+
+
+  var album_1_final = {
+    stimulus: '<p>Final Evaluation</p>',
+    type: "html-slider-response",
+    labels: ['-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', 'Neutral', '+1', '+2', '+3', '+4', '+5', '+6', '+7', '+8', '+9', '+10'],
+    slider_width: 900,
+    min: 0,
+    max: 100,
+    start: 50,
+    prompt: "<p>How Unpleasant/Pleasant was the entire album?</p>",
+    response_ends_trial: true,
+    post_trial_gap: 1000
+  }
+
+
+
+  var recognition_instruction = {
+    type: "html-keyboard-response",
+    stimulus: '<p>Now your task is to identify the pictures that were presented in the previouse album. If you saw the picture drag press F and if you did not see the picture press J.<p><p>Now press any key to start.</p>'
+  }
+  var recognition_test_1 = {
+    timeline: [
+      {
+        type: "image-keyboard-response",
+        stimulus: jsPsych.timelineVariable('pics'),
+        prompt: '<p>Have you seen this picture?</p><p>If Yes press f, if No press j.</p>',
+        choices: [70, 74],
+        stimulus_height: 300,
+        response_ends_trial: true,
+        randomize_order: true,
+        post_trial_gap: 1000,
+        require_movement: false,
+        data: jsPsych.timelineVariable('data'),
+        on_finish: function (data) {
+          if (data.key_press == data.correct_response) {
+            data.accuracy = 1
+          } else {
+            data.accuracy = 0
+          }
+        }
+      }
+    ],
+    timeline_variables: [
+      { pics: 'img/album1_rec/b1.jpg', data: { test_part: 'album1_rec', image: 'b1', valence: 3.833, arousal: 2.366, correct_response: '74' } },
+      { pics: 'img/album1_rec/b2.jpg', data: { test_part: 'album1_rec', image: 'b2', valence: 3.833, arousal: 2.366, correct_response: '74' } },
+      { pics: 'img/album1_rec/b3.jpg', data: { test_part: 'album1_rec', image: 'b3', valence: 4.109, arousal: 2.165, correct_response: '74' } },
+      { pics: 'img/album1_rec/b4.jpg', data: { test_part: 'album1_rec', image: 'b4', valence: 4.109, arousal: 2.369, correct_response: '74' } },
+      { pics: 'img/album1_rec/b5.jpg', data: { test_part: 'album1_rec', image: 'b5', valence: 4.127, arousal: 1.811, correct_response: '74' } },
+      { pics: 'img/album1_rec/b6.jpg', data: { test_part: 'album1_rec', image: 'b6', valence: 4.158, arousal: 1.864, correct_response: '74' } },
+      { pics: 'img/album1_rec/b7.jpg', data: { test_part: 'album1_rec', image: 'b7', valence: 4.594, arousal: 2.864, correct_response: '74' } },
+      { pics: 'img/album1_rec/b8.jpg', data: { test_part: 'album1_rec', image: 'b8', valence: 4.157, arousal: 1.812, correct_response: '74' } },
+      { pics: 'img/album1_rec/b9.jpg', data: { test_part: 'album1_rec', image: 'b9', valence: 4.435, arousal: 2.298, correct_response: '74' } },
+      { pics: 'img/album1_rec/b10.jpg', data: { test_part: 'album1_rec', image: 'b10', valence: 4.519, arousal: 2.178, correct_response: '74' } },
+      { pics: 'img/album1_rec/b11.jpg', data: { test_part: 'album1_rec', image: 'b11', valence: 2.676, arousal: 3.961, correct_response: '74' } },
+      { pics: 'img/album1_rec/b12.jpg', data: { test_part: 'album1_rec', image: 'b12', valence: 2.01, arousal: 3.525, correct_response: '74' } },
+      { pics: 'img/album1_rec/b13.jpg', data: { test_part: 'album1_rec', image: 'b13', valence: 2.333, arousal: 4.163, correct_response: '74' } },
+      { pics: 'img/album1_rec/b14.jpg', data: { test_part: 'album1_rec', image: 'b14', valence: 4.627, arousal: 2.287, correct_response: '74' } },
+      { pics: 'img/album1_rec/b15.jpg', data: { test_part: 'album1_rec', image: 'b15', valence: 4.892, arousal: 2.337, correct_response: '74' } },
+
+      { pics: 'img/album1/a1.jpg', data: { test_part: 'album_1', image: 'a1', valence: 4.333, arousal: 2.109, correct_response: '70' } },
+      { pics: 'img/album1/a2.jpg', data: { test_part: 'album_1', image: 'a2', valence: 4.02, arousal: 2.02, correct_response: '70' } },
+      { pics: 'img/album1/a3.jpg', data: { test_part: 'album_1', image: 'a3', valence: 4.089, arousal: 1.932, correct_response: '70' } },
+      { pics: 'img/album1/a4.jpg', data: { test_part: 'album_1', image: 'a4', valence: 4.314, arousal: 2.198, correct_response: '70' } },
+      { pics: 'img/album1/a5.jpg', data: { test_part: 'album_1', image: 'a5', valence: 4.333, arousal: 2.287, correct_response: '70' } },
+      { pics: 'img/album1/a6.jpg', data: { test_part: 'album_1', image: 'a6', valence: 3.999, arousal: 2, correct_response: '70' } },
+      { pics: 'img/album1/a7.jpg', data: { test_part: 'album_1', image: 'a7', valence: 4.204, arousal: 1.981, correct_response: '70' } },
+      { pics: 'img/album1/a8.jpg', data: { test_part: 'album_1', image: 'a8', valence: 3.804, arousal: 2.356, correct_response: '70' } },
+      { pics: 'img/album1/a9.jpg', data: { test_part: 'album_1', image: 'a9', valence: 4.245, arousal: 2.347, correct_response: '70' } },
+      { pics: 'img/album1/a10.jpg', data: { test_part: 'album_1', image: 'a10', valence: 4.218, arousal: 2.301, correct_response: '70' } },
+      { pics: 'img/album1/a14.jpg', data: { test_part: 'album_1', image: 'a14', valence: 4.549, arousal: 2.257, correct_response: '70' } },
+      { pics: 'img/album1/a15.jpg', data: { test_part: 'album_1', image: 'a15', valence: 4.941, arousal: 2.426, correct_response: '70' } },
+      { pics: 'img/album1/a11.jpg', data: { test_part: 'album_1', image: 'a11', valence: 2.147, arousal: 4.099, correct_response: '70' } },
+      { pics: 'img/album1/a12.jpg', data: { test_part: 'album_1', image: 'a12', valence: 2.137, arousal: 3.069, correct_response: '70' } },
+      { pics: 'img/album1/a13.jpg', data: { test_part: 'album_1', image: 'a13', valence: 2.049, arousal: 4.106, correct_response: '70' } },
+
+
+
+    ],
+    randomize_order: true
+  }
+  /*
+ var trial_instruction = {
+     type: "html-keyboard-response",
+     stimulus: '<p>Now you will see multiple images. You can use the slider to rate the Unpleasantnees/Pleasantness of the images.</p><p> If you are ready to begin, press any key to start.</p>'
+ }
+
+ var album_2 = {
+   timeline: [
+       {
+           type: "image-slider-response",
+           labels: ['-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', 'Neutral','+1', '+2', '+3', '+4', '+5', '+6', '+7', '+8', '+9', '+10'],
+           prompt: "<p>How Unpleasant/Pleasant is this picture?</p>",
+           slider_width: 900,
+           min: 0,
+           max: 100,
+           start: 50,
+           stimulus: jsPsych.timelineVariable('pics'),
+           stimulus_height: 300,
+           response_ends_trial: true,
+           post_trial_gap: 1000,
+           data: jsPsych.timelineVariable('data'),
+            on_finish: function(data) {
+           if (data.response == data.correct_response) {
+             data.accuracy = 'NA'
+           } else {
+             data.accuracy = 'NA'
+           }
+         }
+       }
+   ],
+   timeline_variables: [
+     { pics: 'img/album2/c1.jpg', data:{test_part:'album_2', image:'c1' ,valence:4.363 , arousal:2.446}},
+     { pics: 'img/album2/c2.jpg' , data:{test_part:'album_2', image:'c2' ,valence:4.257 , arousal:2.204 }},
+     { pics: 'img/album2/c3.jpg' , data:{test_part:'album_2', image:'c3' ,valence:4.166 , arousal:2.148}},
+     { pics: 'img/album2/c4.jpg' , data:{test_part:'album_2', image:'c4' ,valence:4.139 , arousal:2.202}},
+     { pics: 'img/album2/c5.jpg' , data:{test_part:'album_2', image:'c5' ,valence:4.13 , arousal:2.250}},
+     { pics: 'img/album2/c6.jpg' , data:{test_part:'album_2', image:'c6' ,valence:3.970 , arousal:2.673}},
+     { pics: 'img/album2/c7.jpg' , data:{test_part:'album_2', image:'c7' ,valence:4 , arousal:3.269}},
+     { pics: 'img/album2/c8.jpg' , data:{test_part:'album_2', image:'c8' ,valence:4.388 , arousal:3.211}},
+     { pics: 'img/album2/c9.jpg' , data:{test_part:'album_2', image:'c9' ,valence:3.213 , arousal:3.625}},
+     { pics: 'img/album2/c10.jpg' , data:{test_part:'album_2', image:'c10' ,valence: 4.02, arousal:2.99}},
+     { pics: 'img/album2/c14.jpg' , data:{test_part:'album_2', image:'c14' ,valence:3.775 , arousal:2.069}},
+     { pics: 'img/album2/c15.jpg' , data:{test_part:'album_2', image:'c15' ,valence:4.089 , arousal:1.845}},
+     { pics: 'img/album2/c13.jpg' , data:{test_part:'album_2', image:'c13' ,valence:6.206, arousal:3.96}},
+     { pics: 'img/album2/c11.jpg' , data:{test_part:'album_2', image:'c11' ,valence:5.634 , arousal:3.485}},
+     { pics: 'img/album2/c12.jpg' , data:{test_part:'album_2', image:'c12' ,valence: 6.12, arousal:3.712}},
+     
+ ] 
+ }
+
+ 
+ var album_2_final = {
+           stimulus: '<p>Final Evaluation</p>',
+           type: "html-slider-response",
+           labels: ['-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', 'Neutral','+1', '+2', '+3', '+4', '+5', '+6', '+7', '+8', '+9', '+10'],
+           slider_width: 900,
+           min: 0,
+           max: 100,
+           start: 50,
+           prompt: "<p>How Unpleasant/Pleasant was the entire album?</p>",
+           response_ends_trial: true,
+           post_trial_gap: 1000
+       } 
+
+
+ 
+ var recognition_instruction = {
+           type: "html-keyboard-response",
+           stimulus: '<p>Now your task is to identify the pictures that were presented in the previouse album.If you saw the picture press F and if you did not see the picture press J.</p><p>Now press any key to start.</p>'
+       }                
+ var recognition_test_2 = {
+     timeline: [
+       {
+         type: "image-keyboard-response",
+         stimulus: jsPsych.timelineVariable('pics'),
+         prompt: '<p>Have you seen this picture?<p></p>If yes press f, if No press J.</p>',
+         choices: [70, 74],
+         stimulus_height: 300,
+         response_ends_trial: true, 
+         randomize_order: true,
+         post_trial_gap: 1000,
+         require_movement: true,
+         data: jsPsych.timelineVariable('data'),
+         on_finish: function(data) {
+           if (data.key_press == data.correct_response) {
+             data.accuracy = 1
+           } else {
+             data.accuracy = 0
+           }
+         }
+       }
+     ],
+     timeline_variables: [
+         { pics: 'img/album2_rec/d1.jpg' ,data: {test_part: 'album2_rec', image:'d1' ,valence:4.019 , arousal:1.981 , correct_response: '74'}},
+         { pics: 'img/album2_rec/d2.jpg' ,data: {test_part: 'album2_rec', image:'d2' ,valence:4.149 , arousal:2.087 , correct_response: '74'}},
+         { pics: 'img/album2_rec/d3.jpg' ,data: {test_part: 'album2_rec', image:'d3' ,valence:4.064 , arousal:2.105 , correct_response: '74'}},
+         { pics: 'img/album2_rec/d4.jpg' ,data: {test_part: 'album2_rec', image:'d4' ,valence:4.238 , arousal: 2.243, correct_response: '74'}},
+         { pics: 'img/album2_rec/d5.jpg' ,data: {test_part: 'album2_rec', image:'d5' ,valence:4.049 , arousal: 2.238, correct_response: '74'}},
+         { pics: 'img/album2_rec/d6.jpg' ,data: {test_part: 'album2_rec', image:'d6' ,valence:4.029 , arousal:2.762 , correct_response: '74'}},
+         { pics: 'img/album2_rec/d7.jpg' ,data: {test_part: 'album2_rec', image:'d7' ,valence:4.147 , arousal:3.475 , correct_response: '74'}},
+         { pics: 'img/album2_rec/d8.jpg' ,data: {test_part: 'album2_rec', image:'d8' ,valence:4.435 , arousal:3.135 , correct_response: '74'}},
+         { pics: 'img/album2_rec/d9.jpg' ,data: {test_part: 'album2_rec', image:'d9' ,valence:3.213 , arousal:3.625 , correct_response: '74'} },
+         { pics: 'img/album2_rec/d10.jpg',data: {test_part: 'album2_rec', image:'d10' ,valence:3.921 , arousal:2.874 , correct_response: '74'} },
+         { pics: 'img/album2_rec/d11.jpg' ,data: {test_part: 'album2_rec', image:'d11' ,valence:5.683 , arousal:3.495 , correct_response: '74'}},
+         { pics: 'img/album2_rec/d12.jpg' ,data: {test_part: 'album2_rec', image:'d12' ,valence: 6.0686, arousal: 3.772, correct_response: '74'}},
+         { pics: 'img/album2_rec/d13.jpg' ,data: {test_part: 'album2_rec', image:'d13' ,valence:6.109 , arousal:4.291 , correct_response: '74'}},
+         { pics: 'img/album2_rec/d14.jpg' ,data: {test_part: 'album2_rec', image:'d14' ,valence:4.314 , arousal:2.505 , correct_response: '74'}},
+         { pics: 'img/album2_rec/d15.jpg' ,data: {test_part: 'album2_rec', image:'d15' ,valence:4.396 , arousal:3.689 , correct_response: '74'}}, 
+
+         { pics: 'img/album2/c1.jpg', data:{test_part:'album_2', image:'c1' ,valence:4.363 , arousal:2.446, correct_response:'70' }},
+         { pics: 'img/album2/c2.jpg' , data:{test_part:'album_2', image:'c2' ,valence:4.257 , arousal:2.204 , correct_response:'70'}},
+         { pics: 'img/album2/c3.jpg' , data:{test_part:'album_2', image:'c3' ,valence:4.166 , arousal:2.148 , correct_response:'70'}},
+         { pics: 'img/album2/c4.jpg' , data:{test_part:'album_2', image:'c4' ,valence:4.139 , arousal:2.202 , correct_response:'70'}},
+         { pics: 'img/album2/c5.jpg' , data:{test_part:'album_2', image:'c5' ,valence:4.13 , arousal:2.250 , correct_response:'70'}},
+         { pics: 'img/album2/c6.jpg' , data:{test_part:'album_2', image:'c6' ,valence:3.970 , arousal:2.673 , correct_response:'70'}},
+         { pics: 'img/album2/c7.jpg' , data:{test_part:'album_2', image:'c7' ,valence:4 , arousal:3.269 , correct_response:'70'}},
+         { pics: 'img/album2/c8.jpg' , data:{test_part:'album_2', image:'c8' ,valence:4.388 , arousal:3.211 , correct_response:'70'}},
+         { pics: 'img/album2/c9.jpg' , data:{test_part:'album_2', image:'c9',valence:3.213 , arousal:3.625, correct_response:'70' }},
+         { pics: 'img/album2/c10.jpg' , data:{test_part:'album_2', image:'c10' ,valence: 4.02, arousal:2.99 , correct_response:'70'}},
+         { pics: 'img/album2/c14.jpg' , data:{test_part:'album_2', image:'c14' ,valence:3.775 , arousal:2.069 , correct_response:'70'}},
+         { pics: 'img/album2/c15.jpg' , data:{test_part:'album_2', image:'c15' ,valence:4.089 , arousal:1.845, correct_response:'70' }},
+         { pics: 'img/album2/c13.jpg' , data:{test_part:'album_2', image:'c13' ,valence:6.206, arousal:3.96 , correct_response:'70'}},
+         { pics: 'img/album2/c11.jpg' , data:{test_part:'album_2', image:'c11' ,valence:5.634 , arousal:3.485 , correct_response:'70'}},
+         { pics: 'img/album2/c12.jpg' , data:{test_part:'album_2', image:'c12' ,valence: 6.12, arousal:3.712 , correct_response:'70'}}, 
+     ],
+     randomize_order: true
+ } 
+ 
+ var trial_instruction = {
+     type: "html-keyboard-response",
+     stimulus: '<p>Now you will see multiple images. You can use the slider to rate the Unpleasantnees/Pleasantness of the images.</p><p>If you are ready to begin, press any key to start.</p>'
+ }
+ var album_3 = {
+   timeline: [
+                 {
+           type: "image-slider-response",
+           labels: ['-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', 'Neutral','+1', '+2', '+3', '+4', '+5', '+6', '+7', '+8', '+9', '+10'],
+           prompt: "<p>How Unpleasant/Pleasant is this picture?</p>",
+           slider_width: 900,
+           min: 0,
+           max: 100,
+           start: 50,
+           stimulus: jsPsych.timelineVariable('pics'),
+           stimulus_height: 300,
+           response_ends_trial: true,
+           post_trial_gap: 1000,
+           data: jsPsych.timelineVariable('data'),
+           on_finish: function(data) {
+           if (data.response == data.correct_response) {
+             data.accuracy = 'NA'
+           } else {
+             data.accuracy = 'NA'
+           }
+         }
+            
+       }
+             ],
+   timeline_variables: [
+     { pics: 'img/album3/e1.jpg' , data:{test_part:'album_3', image:'e1' ,valence:4.139 , arousal:2.039}},
+     { pics: 'img/album3/e2.jpg' , data:{test_part:'album_3', image:'e2' ,valence:3.556 , arousal:2.485 }},
+     { pics: 'img/album3/e3.jpg' , data:{test_part:'album_3', image:'e3' ,valence:2.96 , arousal:3.874 }},
+     { pics: 'img/album3/e4.jpg' , data:{test_part:'album_3', image:'e4' ,valence:3.925 , arousal:2.076 }},
+     { pics: 'img/album3/e5.jpg' , data:{test_part:'album_3', image:'e5' ,valence:4.009 , arousal:2.067 }},
+     { pics: 'img/album3/e6.jpg' , data:{test_part:'album_3', image:'e6' ,valence:4.882 , arousal:2.713 }},
+     { pics: 'img/album3/e7.jpg' , data:{test_part:'album_3', image:'e7' ,valence:4.436 , arousal:3.136 }},
+     { pics: 'img/album3/e8.jpg' , data:{test_part:'album_3', image:'e8' ,valence:4.823 , arousal:2.900 }},
+     { pics: 'img/album3/e9.jpg' , data:{test_part:'album_3', image:'e9' ,valence:4.208 , arousal:2.466 }},
+     { pics: 'img/album3/e10.jpg' , data:{test_part:'album_3',image:'e10' ,valence:3.853 , arousal:2.495 }},
+     { pics: 'img/album3/e11.jpg' , data:{test_part:'album_3', image:'e11' ,valence:4.277 , arousal:2.147 }},
+     { pics: 'img/album3/e12.jpg' , data:{test_part:'album_3',image:'e12' ,valence:4.637 , arousal:2.069}},
+     
+ ] 
+ }
+ var album_3_final = {
+           stimulus: '<p>Final Evaluation</p>',
+           type: "html-slider-response",
+           labels: ['-10', '-9', '-8', '-7', '-6', '-5', '-4', '-3', '-2', '-1', 'Neutral','+1', '+2', '+3', '+4', '+5', '+6', '+7', '+8', '+9', '+10'],
+           slider_width: 900,
+           min: 0,
+           max: 100,
+           start: 50,
+           prompt: "<p>How Unpleasant/Pleasant is the entire album?</p>",
+           response_ends_trial: true,
+           post_trial_gap: 1000
+
+       } 
+
+ 
+ var recognition_instruction = {
+           type: "html-keyboard-response",
+           stimulus: '<p>Now your task is to identify the pictures that were presented in the previouse trials. If you saw the picture drag the slider to the right (Yes) and if you did not see the picture drag the slider to the left (No).</p><p>Now press any key to start.</p>'
+       }   
+ var recognition_test_3 = {
+     timeline: [
+         {
+         type: "image-keyboard-response",
+         stimulus: jsPsych.timelineVariable('pics'),
+         prompt: '<p>Have you seen this picture?<p></p>If Yes press f, if No press J.</p>',
+         choices: [70, 74],
+         slider_width: 300,
+         stimulus_height: 300,
+         response_ends_trial: true, 
+         randomize_order: true,
+         post_trial_gap: 1000,
+         require_movement: true,
+         data: jsPsych.timelineVariable('data'),
+         on_finish: function(data) {
+           if (data.key_press == data.correct_response) {
+             data.accuracy = 1
+           } else {
+             data.accuracy = 0
+           }
+         }
+         
+         }
+     ],
+     timeline_variables: [
+     { pics: 'img/album3_rec/f1.jpg',data: {test_part: 'album3_rec', image:'f1' ,valence: 4, arousal: 1.911, correct_response: '74'}},
+     { pics: 'img/album3_rec/f2.jpg',data: {test_part: 'album3_rec', image:'f2' ,valence:3.569 , arousal:2.347 , correct_response: '74'}},
+     { pics: 'img/album3_rec/f3.jpg',data: {test_part: 'album3_rec', image:'f3' ,valence: 3.056, arousal:3.529 , correct_response: '74'}},
+     { pics: 'img/album3_rec/f4.jpg',data: {test_part: 'album3_rec', image:'f4' ,valence:4.297 , arousal:2.233 , correct_response: '74'}},
+     { pics: 'img/album3_rec/f5.jpg',data: {test_part: 'album3_rec', image:'f5' ,valence:4.265 , arousal:2.95 , correct_response: '74'} },
+     { pics: 'img/album3_rec/f6.jpg',data: {test_part: 'album3_rec', image:'f6' ,valence:4.490 , arousal:3.257 , correct_response: '74'}},
+     { pics: 'img/album3_rec/f7.jpg',data: {test_part: 'album3_rec', image:'f7' ,valence:4.647 , arousal:2.871 , correct_response: '74'}},
+     { pics: 'img/album3_rec/f8.jpg',data: {test_part: 'album3_rec', image:'f8' ,valence:4.421 , arousal:2.128 , correct_response: '74'}},
+     { pics: 'img/album3_rec/f9.jpg',data: {test_part: 'album3_rec', image:'f9' ,valence:4.238 , arousal: 2.718, correct_response: '74'}},
+     { pics: 'img/album3_rec/f10.jpg',data: {test_part: 'album3_rec', image:'f10' ,valence:3.706 , arousal:2.554 , correct_response: '74'}},
+     { pics: 'img/album3_rec/f11.jpg',data: {test_part: 'album3_rec', image:'f11' ,valence:4.304 , arousal:2.267 , correct_response: '74'}},
+     { pics: 'img/album3_rec/f12.jpg',data: {test_part: 'album3_rec', image:'f12' ,valence:4.055 , arousal:1.865 , correct_response: '74'}},
+
+     { pics: 'img/album3/e1.jpg' , data:{test_part:'album_3', image:'e1' ,valence:4.139 , arousal:2.039 , correct_response:'70'}},
+     { pics: 'img/album3/e2.jpg' , data:{test_part:'album_3', image:'e2' ,valence:3.556 , arousal:2.485 , correct_response:'70' }},
+     { pics: 'img/album3/e3.jpg' , data:{test_part:'album_3', image:'e3' ,valence:2.96 , arousal:3.874 , correct_response:'70' }},
+     { pics: 'img/album3/e4.jpg' , data:{test_part:'album_3', image:'e4' ,valence:3.925 , arousal:2.076 , correct_response:'70' }},
+     { pics: 'img/album3/e5.jpg' , data:{test_part:'album_3', image:'e5' ,valence:4.009 , arousal:2.067 , correct_response:'70' }},
+     { pics: 'img/album3/e6.jpg' , data:{test_part:'album_3', image:'e6' ,valence:4.882 , arousal:2.713 , correct_response:'70' }},
+     { pics: 'img/album3/e7.jpg' , data:{test_part:'album_3', image:'e7' ,valence:4.436 , arousal:3.136 , correct_response:'70' }},
+     { pics: 'img/album3/e8.jpg' , data:{test_part:'album_3', image:'e8' ,valence:4.823 , arousal:2.900 , correct_response:'70'}},
+     { pics: 'img/album3/e9.jpg' , data:{test_part:'album_3', image:'e9' ,valence:4.208 , arousal:2.466, correct_response:'70' }},
+     { pics: 'img/album3/e10.jpg' , data:{test_part:'album_3', image:'e10' ,valence:3.853 , arousal:2.495 , correct_response:'70'}},
+     { pics: 'img/album3/e11.jpg', data:{test_part:'album_3', image:'e11' ,valence:4.277 , arousal:2.147, correct_response:'70' }},
+     { pics: 'img/album3/e12.jpg' , data:{test_part:'album_3', image:'e12' ,valence:4.637 , arousal:2.069, correct_response:'70' }},
+     
+         
+     ],
+     randomize_order: true
+ }    */
+
+  var test_procedure = {
+    timeline: [trial_instruction, album_1, album_1_final,
+      recognition_instruction, recognition_test_1
+      /*trial_instruction, album_2, album_2_final,
+      recognition_instruction, recognition_test_2,
+      trial_instruction, album_3, album_3_final, 
+      recognition_instruction, recognition_test_3],
+      type: "alternate_groups",
+      groups: [[0,1,2,3,4],[5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19]*/],
+    repetitions: 1,
+    randomize_group_order: false
+  }
+  timeline.push(test_procedure);
+
+
+  /*function saveData(name, data){
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'write_data.php'); 
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.send(JSON.stringify({filename: name, filedata: data}));
+  }
+  
+  jsPsych.init({
+     on_finish: function(){ saveData("experiment_data", jsPsych.data.get().csv());
+     }
+  }); */
+
+  function downloadcsv(csv, filename) {
+
+    var csvfile;
+    var downloadLink;
+    csvfile = new Blob(blobParts = [csv], Options = { type: "text/csv" });
+    downloadLink = document.createElement(tagName = "a");
+    downloadLink.download = filename
+    downloadLink.href = window.URL.createObjectURL(csvfile);
+    downloadLink.style.display = 'none';
+    document.body.appendChild(downloadLink);
+    downloadLink.click()
+  }
+
+
+  jsPsych.init({
+    timeline: timeline,
+    fullscreen: true,
+    on_finish: function () {
+      var csv = jsPsych.data.get().csv();
+      var filename = jsPsych.data.get().values()[0].Part_ID + "_" + DATE + "data.csv";
+      downloadcsv(csv, filename);
+      jsPsych.data.displayData();
+      jsPsych.data.get().csv();
+    }
+  });
+
+
+
+  /* jsPsych.init({
+    timeline: timeline,
+    on_finish: function() {
+      jsPsych.data.localSave.localSave('sepideh.csv', 'csv')
+      jsPsych.data.displayData('csv')
+    }
+  })   */
+  /*function saveData(name, data){
+   var xhr = new XMLHttpRequest();
+   xhr.open('POST', 'write_data.php'); // 'write_data.php' is the path to the php file described above.
+   xhr.setRequestHeader('Content-Type', 'application/json');
+   xhr.send(JSON.stringify({filename: name, filedata: data}));
+ }
+
+ // call the saveData function after the experiment is over
+ jsPsych.init({
+    // code to define the experiment structure would go here...
+    on_finish: function(){ saveData("experiment_data", jsPsych.data.get().csv()); }
+ }); */
+
+
+</script>
+
+</html>
